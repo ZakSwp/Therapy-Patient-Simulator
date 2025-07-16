@@ -11,5 +11,6 @@ Requirements for running a simulation are:
 
 4- Last session transcript directory or file (.txt)
 
+5- A .env file with your gemini api key configured as `"GEMINI_API_KEY"`
 
 Replace `apiKey = os.environ.get("GEMINI_API_KEY")` with `apiKey = "your_api_key"` if dotenv fails to load your gemini api key.
