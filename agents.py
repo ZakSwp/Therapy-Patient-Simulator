@@ -220,7 +220,6 @@ class CogModelAgent( BaseAgent ):
             response = self.run_prompt(prompt,COGMODEL_CONFIG)
             cogModel = response.text
             self.context=cogModel
-            print(cogModel)
             cogModel = string_to_dict(cogModel)
             session.update_cognitive_model(cogModel)  
 
@@ -233,3 +232,5 @@ class CogModelAgent( BaseAgent ):
 #TODO: Reformat LLM output into a dict to be saved
 
 #TODO: replace print debug messages with logger output
+
+#TODO: restructure patient storage folders into seperate folders per patient
