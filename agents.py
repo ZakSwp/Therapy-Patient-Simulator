@@ -1,10 +1,13 @@
 from utils import *
 from config import *
 from prompts import *
+import random
 from google import genai
-
+random.seed()
 
 class PatientProfile():
+    '''Class containing the patient persona (path) and cognitive model (path) for the construction of the overall personality.
+    '''
     def __init__(self, personaPath: str, cogModelPath: str):
         try:
             with open(personaPath, 'r') as file:
@@ -18,11 +21,10 @@ class PatientProfile():
         try:
             self.cogModel = cogModel
             save_dict(self.paths[1] , cogModel)
-            print(f"Cognitive model saved at {self.paths[1]}")
+            #print(f"Cognitive model saved at {self.paths[1]}")
         except IOError as e:
             print(f"Error saving updated cognitive model to {self.paths[1]}")
-
-    
+ 
 class Session():
     def __init__(self,patientProfile: PatientProfile,  lastSessionPath, globalSessionPath, dialgID=0, memory = []):
         self.patient = patientProfile
@@ -51,15 +53,15 @@ class Session():
             with open(self.paths[0], 'w', encoding = 'utf-8') as f:
                 f.write(f"Summary of session {self.seshID}\n")
                 f.writelines(summary)
-            print(f"Session summary updated: {self.paths[0]}")
+            print(f"*Session summary updated: {self.paths[0]}*")
         except IOError as e:
             print(f"Failed to update session summary: {self.paths[0]}")
             raise
     def update_global_summary(self, summary):
         """Updates global sessions summary file with new summary."""
-        self.globalSummary = summary#TODO file management 
-        file = open(self.paths[1], "w")
-        file.writelines(summary)
+        self.globalSummary += summary #TODO file management 
+        file = open(self.paths[1], "a")
+        file.writelines("\n" + summary + "\n")
         file.close()
     def update_memory(self, qst, ans):
         """Updates current session memory. Verbatim."""
@@ -67,6 +69,10 @@ class Session():
         self.dialgID+=1
     def update_cognitive_model(self,cogModel):
         self.patient.update_cognitive_model(cogModel)
+    def get_last_session_summary(self):
+        return(self.lastSessionSummary)
+    def get_global_summary(self):
+        return(self.globalSummary)
     def get_last_utterance(self):
         try:
             return(self.memory[-1])
@@ -75,7 +81,7 @@ class Session():
     def check_for_termination(self, apiKey : str, qst,ans):
         terminationAgent = BaseAgent(apiKey, MODEL, {})
         try:
-            response = terminationAgent.run_prompt(TERMINATION_CHECK_PROMPT.format(self.memory[-1]), COGMODEL_CONFIG).text #FIXME PLACEHOLDER METHOD 
+            response = terminationAgent.run_prompt(TERMINATION_CHECK_PROMPT.format(self.memory), COGMODEL_CONFIG).text #FIXME PLACEHOLDER METHOD 
             line = response.split('\n')[0]
             words = line.strip().split()
             if words[0]=="YES":
@@ -93,7 +99,6 @@ class BaseAgent():
             self.model = model
             self.partnerDict = {}
             self.type = type
-
     def run_prompt(self, prompt, generationConfig = None):  
         try:
             if generationConfig == None:
@@ -130,9 +135,15 @@ class SpeechAgent( BaseAgent ):
         self.dialgID = dialgID
         self.session = session
     
+    def load_session(self, patient: PatientProfile): 
+        '''Debug method. Loads an empty session (NO DIALOGUE)
+        '''
+        self.session = Session(patient, Paths.LAST_SESSION_PATH, Paths.GLOBAL_SESSION_PATH)
+        print("Empty session started.")
 
     def start_session(self,patient: PatientProfile, debugMode=False):
         self.session = Session(patient, Paths.LAST_SESSION_PATH, Paths.GLOBAL_SESSION_PATH) #TODO: get all patient related filepaths from patient args
+        self.partnerDict["narrator"].check_event()
         while True:
             qst,ans=self.run_prompt(debugMode)
             self.partnerDict["cogModeller"].update_cognitive_model()
@@ -140,19 +151,18 @@ class SpeechAgent( BaseAgent ):
                 break
         self.partnerDict["summarizer"].generate_summary()
         self.partnerDict["summarizer"].generate_global_summary()
-        print("Session concluded. Global summary updated.")
+        print("*Session concluded. Global summary updated.*")
 
     def run_prompt(self, debugMode):
         if not self.dialgID:
             print("Session started.")
             qst = input("Therapist: ")
-            prompt = SPEECH_PROMPT_1.format(self.session.get_description(),self.session.get_cog_model(),self.get_last_session_summary(), self.get_global_summary(),self.context["eventHist"],qst)
+            prompt = SPEECH_PROMPT_1.format(self.session.get_description(),self.session.get_cog_model(),self.get_last_session_summary(), self.get_global_summary(),qst)
             self.dialgID=1
-
         else:
             print(f"\nDialogue turn ID: {self.dialgID}")
             qst = input("Therapist: ")
-            prompt = SPEECH_PROMPT_2.format(self.session.get_description(),self.session.get_cog_model(),self.recall_current_session(),self.get_last_session_summary(),self.get_global_summary(),self.context["eventHist"],qst)
+            prompt = SPEECH_PROMPT_2.format(self.session.get_description(),self.session.get_cog_model(),self.recall_current_session(),self.get_last_session_summary(),self.get_global_summary(),qst)
             self.dialgID+=1
         response = super().run_prompt(prompt)
         if debugMode:
@@ -179,7 +189,6 @@ class SummaryAgent( BaseAgent ):
     def __init__(self, apiKey, model, context = EVENT_HIST):
         self.seshID=0
         super().__init__(apiKey, model, context, "summarizer")
-
     def generate_summary(self):
         """Generates therapy session transcript summary and updates the linked speech agent's lastSessionSummary field.
         Summary agent is required to be linked to speech agent.
@@ -187,7 +196,7 @@ class SummaryAgent( BaseAgent ):
         if "speaker" not in self.partnerDict:
             raise KeyError("Missing speech agent in partnersDict.")
         else:
-            #print("*Generating session summary*\n") #TODO replace print with info logging
+            print("*Generating session summary*") 
             speechAgent = self.partnerDict["speaker"]
             session = speechAgent.session
             prompt = SUMMARY_PROMPT.format(speechAgent.recall_current_session()) #fetch speech agent's last conv memory list.
@@ -197,7 +206,7 @@ class SummaryAgent( BaseAgent ):
         if "speaker" not in self.partnerDict:
             raise KeyError("Missing speech agent in partnersDict.")
         else:
-            #print("*Generating global summary*\n")
+            print("*Generating global summary*")
             speechAgent = self.partnerDict["speaker"] 
             session = speechAgent.session
             prompt = GLOBAL_SUMMARY_PROMPT.format(speechAgent.get_global_summary(), speechAgent.get_last_session_summary(), self.context) #fetch speech agent's global sessions summary
@@ -208,12 +217,11 @@ class CogModelAgent( BaseAgent ):
     def __init__(self, apiKey, model, personaPath):
          context = load_dict(personaPath)
          super().__init__(apiKey, model, context, "cogModeller")
-
     def update_cognitive_model(self):
         if "speaker" not in self.partnerDict:
            raise KeyError("Missing speech agent in partnerDict.") 
         else:
-            print("*Updating patient cognitive model*\n") #TODO: replace print with info logging
+            print("*Updating patient cognitive model*") #TODO: replace print with info logging
             speechAgent = self.partnerDict["speaker"]
             session = speechAgent.session
             prompt = COG_PROMPT.format(speechAgent.recall_current_session(),speechAgent.recall_last_utterance(), speechAgent.session.get_description(), self.get_cog_model())
@@ -222,14 +230,48 @@ class CogModelAgent( BaseAgent ):
             self.context=cogModel
             cogModel = string_to_dict(cogModel)
             session.update_cognitive_model(cogModel)  
-
     def get_cog_model(self):
         session = self.partnerDict["speaker"].session
         if session == None:
             raise ValueError("Found no active session in linked speech agent.\n")
         return(session.get_cog_model())
-    
-#TODO: Reformat LLM output into a dict to be saved
+
+class EventAgent(BaseAgent):
+    def __init__(self, apiKey, model, context=None): 
+        super().__init__(apiKey, model, context, "narrator")
+    def configure(self, p:float, severityRange:tuple =(0,1), relevanceRange:tuple=(0,1), favorabilityRange:tuple = (-1,1)):
+        '''Between-session event generation configuration.
+        Args:
+            p (float) : The probability of an event generation occuring.
+            severityRange (float tuple) : (beginning, end) defining the range of possible severity levels for the event. Max range = [0,1]
+            relevanceRange (float tuple) : (beginning, end) defining the range of possible relevance to the global summary levels. Max range = [0,1]
+            favorabilityRange (float tuple) : (beginning, end) defining the range of possible event favorability levels. Max range = [-1,1]
+             '''
+        self.context = {"Proba":p,
+                        "sr": severityRange,
+                        "rr": relevanceRange,
+                        "fr": favorabilityRange}
+    def check_event(self):
+        print("Event check:")
+        session = self.partnerDict["speaker"].session
+        persona = session.get_description()
+        if random.uniform(0,1)<=self.context["Proba"]:
+            print(" Detected event.\n")
+            sr=round(random.uniform(self.context["sr"][0],self.context["sr"][1]),2)
+            rr=round(random.uniform(self.context["rr"][0],self.context["rr"][1]),2)
+            fr=round(random.uniform(self.context["fr"][0],self.context["fr"][1]),2)
+            print(f"Severity: {sr}, Relavance: {rr}, Favorability: {fr}")
+            response = self.run_prompt(EVENT_GEN_PROMPT.format(persona,session.get_global_summary(),sr,rr,fr))
+            session.update_global_summary(response.text) 
+            print(response.text)
+            return(response)
+        else: 
+            print("No event detected.\n")
+        return(0)
+
+
+
+#DONE: Reformat LLM output into a dict to be saved
 
 #TODO: replace print debug messages with logger output
 

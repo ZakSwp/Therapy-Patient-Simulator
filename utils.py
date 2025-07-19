@@ -74,10 +74,42 @@ def get_session_number(session_text: str):
     return None
 
 def string_to_dict(string: str):
-    dict_string = string.split("Chain Of Thoughts:")[0].strip()
-    parsed_dict = ast.literal_eval(dict_string)
-    print(f"Parsed dict: \n{parsed_dict}")
-    for key in ['Control', 'Self-Efficacy', 'Awareness', 'Recall', 'Cooperation Level']:
-        parsed_dict[key] = float(parsed_dict[key])
-    return(parsed_dict)
+    dict_string = string.split("Chain Of Thoughts")[0].strip()
+    try:
+        parsed_dict = ast.literal_eval(dict_string)
+        for key in ['Control', 'Self-Efficacy', 'Awareness', 'Recall', 'Cooperation Level']:
+            parsed_dict[key] = float(parsed_dict[key])
+        return(parsed_dict)
+    except:
+        print(f"Error parsing dict from:\n{dict_string}")
 
+
+
+def copy_file_contents(source_path, destination_path):
+    try:
+        with open(source_path, 'r', encoding='utf-8') as src:
+            content = src.read()
+
+        with open(destination_path, 'w', encoding='utf-8') as dest:
+            dest.write(content)
+
+        #print(f"Contents copied from '{source_path}' to '{destination_path}' successfully.")
+    except FileNotFoundError:
+        print(f"Error: The file '{source_path}' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def reset_patient_state(patient_name: str):
+    last = f"Summaries/Backups/{patient_name}Last_Backup.txt"
+    globl = f"Summaries/Backups/{patient_name}Global_Backup.txt"
+    model = f"Summaries/Backups/{patient_name}Model_Backup.csv"
+
+    lastDest = f"Summaries/{patient_name}Last.txt"
+    globlDest = f"Summaries/{patient_name}Global.txt"
+    modelDest = f"Persona/{patient_name}Model.csv"
+
+    copy_file_contents(last,lastDest )
+    copy_file_contents(globl,globlDest )
+    copy_file_contents(model,modelDest )
+    print("Patient state reset.\n")

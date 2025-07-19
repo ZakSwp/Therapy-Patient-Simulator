@@ -1,0 +1,19 @@
+{'sdk_http_response': HttpResponse(
+  headers=<dict len=11>
+), 'candidates': [Candidate(
+  content=Content(
+    role='model'
+  ),
+  finish_reason=<FinishReason.MAX_TOKENS: 'MAX_TOKENS'>,
+  index=0
+)], 'create_time': None, 'response_id': None, 'model_version': 'gemini-2.5-flash', 'prompt_feedback': None, 'usage_metadata': GenerateContentResponseUsageMetadata(
+  prompt_token_count=1289,
+  prompt_tokens_details=[
+    ModalityTokenCount(
+      modality=<MediaModality.TEXT: 'TEXT'>,
+      token_count=1289
+    ),
+  ],
+  thoughts_token_count=2499,
+  total_token_count=3788
+), 'automatic_function_calling_history': [], 'parsed': None}

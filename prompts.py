@@ -3,18 +3,16 @@ SPEECH_PROMPT_1 = "We're simulating a psychiatry session. You will play the role
                 "This following cognitive values model your cognitive behavior:\n{}\n"\
                 "DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS."\
                 "This is the beginning of this psychiatry session."\
-                "Keep in mind that this is the transcript from the last session: \n {}\n "\
-                "Also keep in mind that these are the summaries from the previous sessions: \n {}\n "\
-                "Also keep in mind that this event happened between the last two sessions: \n {}\n"\
+                "The following is the transcript from the last session: \n {}\n"\
+                "The following is the global summary of all past sessions, including any events that occured in between sessions:\n {}\n "\
                 "I will be your psycotherapist. I begin by saying: {}"
 SPEECH_PROMPT_2 = """We're simulating a psychiatry session. You will play the role of the patient.
                 This your persona description as a patient:\n{}\n
                 This following cognitive values model your cognitive behavior:\n{}\n
                 DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS.
-                This is a continuation of the following conversation \n {}\n
-                Keep in mind that this is the transcript from the last session: \n {}\n 
-                Also keep in mind that these are the summaries from the previous sessions: \n {}\n
-                Also keep in mind that this event happened between the last two sessions: \n {}\n
+                This is a continuation of this conversation:\n{}\n
+                The following is the transcript from the last session: \n {}\n 
+                The following is the global summary of all past sessions, including any events that occured in between sessions:\n {}\n
                 I will be your psycotherapist. I say: {}"""
 
 
@@ -30,9 +28,9 @@ GLOBAL_SUMMARY_PROMPT = "You are a summarizer agent. You will receive a global s
 "The following events happened between the last two sessions:\n{}\n"
 
 TERMINATION_CHECK_PROMPT = "You are an agent responsible for determining whether a therapy session has reached its conclusion"\
-" whether through agreement or sever disagreement between the two conversing parties (patient and therapist). You will base your"\
-" judgement on the following utterance between the two: {} Justify with chain of thought"\
-"Output 'YES', 'NO' or 'INCONCLUSIVE' in a single line, and a brief justification in a newline."
+" whether through agreement or SEVERE disagreement between the two conversing parties (patient and therapist).DO NOT SIMPLY TERMINATE THE SESSION AT THE FIRST SIGHT OF CONFLICT. You will base your"\
+" judgement on the following conversation transcript between the two: {} Justify with chain of thought"\
+"Output 'YES', 'NO' or 'INCONCLUSIVE' in a single line, and a brief justification in a newline.  "\
 
 
 COG_PROMPT = "You are an agent responsible for updating a patient's cognitive model."\
@@ -45,9 +43,20 @@ COG_PROMPT = "You are an agent responsible for updating a patient's cognitive mo
 "(float in range 1 to -1), Self-Efficacy (float in range 1 to -1), Awareness (float in range 1 to -1), Recall (float in range 1 to -1"\
 " defining how good of a memory this patient has), Cooperation Level (float in range 1 to 0 represents the patient's willingness to cooperate"\
 " with therapy). Update the fields according to the  afore-mentioned data to mirror any change that occured within the last utterances. After"\
-" returning the cognitive model STRICTLY EXACTLY the same way the given cognitive model was formatted"\
+" returning the cognitive model STRICTLY EXACTLY the same way the given cognitive model was formatted (DO NOT use ``` or the word json)"\
 ", explain in a new paragraph titled 'Chain Of Thoughts' the changes using Chain Of Thoughts."\
 #". Format STRICTLY EXACTLY the same way the given cognitive model was formatted."#, using double quotes"\
 #" to mark strings, and no quotes at all for floats."
 #" This is a summary of all previous sessions:\n{}\n"\
 
+EVENT_GEN_PROMPT = "You are an event generation agent playing the role of narrator. The following is a therapy patient's persona:\n{}.\nThe following" \
+" is the global summary of all the discussions between said persona and their therapist:\n{}\nThe following is the event severity level:\n{}" \
+" (determines how important and/or severe the event to be generated is in said persona's life). \nThe following is the event revalance level"\
+":\n{} (determines how relevant said event is to the discussions that occured in the global summary). The following is the event favorability level \n{}" \
+" (determines how favorable the event is to the patient's life, with 1 being a net positive event, -1 a net negative event and 0.0 a neutral event" \
+"\nGenerate a brief and simple description"\
+" of an event that occured between the last session and the upcoming one that is worth saving in patient's global sessions summary. The event" \
+" can be anything from the patient's car being broken into while it was parked in the last session, or them simply running into an old friend "\
+"or stumbling upon a new music genre that they appreciate. Be CREATIVE and DIVERSE in the generation of the event, you CAN (but don't have to) even make it a continuity of a previous "\
+"event that was already mentioned in the global memory, but formulate STRICTLY THE SAME as given "\
+"in the following example:\n**Between sessions 1 and 2:** Patient's cousin is getting married to an ethnic Russian.\n" 
