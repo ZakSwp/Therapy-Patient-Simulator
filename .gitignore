@@ -1,4 +1,6 @@
 /.env
 /__pycache__
-
+/Summaries
+/CrashLog.txt
+/Persona
 /usageStats.csv

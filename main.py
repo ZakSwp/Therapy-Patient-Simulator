@@ -12,7 +12,7 @@ load_dotenv()
 
 apiKey = os.environ.get("GEMINI_API_KEY")
 
-if input("Reset patient state?").lower() in "yes y yeah ye yea yeh":
+if input("Reset patient state?").lower() in "yes":
     reset_patient_state("Fatiha")
 patient = agents.PatientProfile(Paths.PERSONA_PATH,Paths.COGNITIVE_MODEL_PATH)
 speechAgent = agents.SpeechAgent(apiKey, MODEL)
