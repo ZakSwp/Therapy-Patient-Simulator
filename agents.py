@@ -37,7 +37,7 @@ class Session():
             self.globalSummary = file.read()
         try:
             self.seshID = get_session_number(self.lastSessionSummary)+1
-            print(self.seshID)
+            print(f"Sessino ID = {self.seshID}")
         except:
             self.seshID = 0
     def get_description(self):
@@ -85,6 +85,7 @@ class Session():
             line = response.split('\n')[0]
             words = line.strip().split()
             if words[0]=="YES":
+                print("*Session concluded.*")
                 return(1)
             return(0)
         except:
@@ -151,7 +152,7 @@ class SpeechAgent( BaseAgent ):
                 break
         self.partnerDict["summarizer"].generate_summary()
         self.partnerDict["summarizer"].generate_global_summary()
-        print("*Session concluded. Global summary updated.*")
+        print("*Global summary updated.*")
 
     def run_prompt(self, debugMode):
         if not self.dialgID:
@@ -164,7 +165,7 @@ class SpeechAgent( BaseAgent ):
             qst = input("Therapist: ")
             prompt = SPEECH_PROMPT_2.format(self.session.get_description(),self.session.get_cog_model(),self.recall_current_session(),self.get_last_session_summary(),self.get_global_summary(),qst)
             self.dialgID+=1
-        response = super().run_prompt(prompt)
+        response = super().run_prompt(prompt, SPEECH_CONFIG)
         if debugMode:
             print(response.__dict__)
         ans = response.text
@@ -209,7 +210,7 @@ class SummaryAgent( BaseAgent ):
             print("*Generating global summary*")
             speechAgent = self.partnerDict["speaker"] 
             session = speechAgent.session
-            prompt = GLOBAL_SUMMARY_PROMPT.format(speechAgent.get_global_summary(), speechAgent.get_last_session_summary(), self.context) #fetch speech agent's global sessions summary
+            prompt = GLOBAL_SUMMARY_PROMPT.format(session.seshID, speechAgent.get_last_session_summary()) #fetch speech agent's global sessions summary
             summary = self.run_prompt(prompt, SUMMARY_CONFIG).text
             session.update_global_summary(summary)
   
@@ -268,7 +269,6 @@ class EventAgent(BaseAgent):
         else: 
             print("No event detected.\n")
         return(0)
-
 
 
 #DONE: Reformat LLM output into a dict to be saved

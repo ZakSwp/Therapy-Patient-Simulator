@@ -1,31 +1,38 @@
-SPEECH_PROMPT_1 = "We're simulating a psychiatry session. You will play the role of the patient."\
+SPEECH_PROMPT_1 = "We're simulating a therapy session. You will play the role of the patient."\
                 "This your persona description as a patient:\n{}\n"\
                 "This following cognitive values model your cognitive behavior:\n{}\n"\
-                "DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS."\
-                "This is the beginning of this psychiatry session."\
+                "DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS. Do not explicit your symptoms in a direct way"\
+                " as that is unrealistic for a human therapy patient. This is the beginning of this therapy session."\
                 "The following is the transcript from the last session: \n {}\n"\
                 "The following is the global summary of all past sessions, including any events that occured in between sessions:\n {}\n "\
-                "I will be your psycotherapist. I begin by saying: {}"
-SPEECH_PROMPT_2 = """We're simulating a psychiatry session. You will play the role of the patient.
+                "I will be your therapist. I begin by saying: {}"
+SPEECH_PROMPT_2 = """We're simulating a therapy session. You will play the role of the patient.
                 This your persona description as a patient:\n{}\n
                 This following cognitive values model your cognitive behavior:\n{}\n
-                DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS.
-                This is a continuation of this conversation:\n{}\n
+                DO NOT USE ACTION BEATS, GESTURE DESCRIPTIONS OR PARENTHETICALS. Do not explicit your symptoms in a direct way
+                as that is unrealistic for a human therapy patient. This is a continuation of this conversation:\n{}\n
                 The following is the transcript from the last session: \n {}\n 
                 The following is the global summary of all past sessions, including any events that occured in between sessions:\n {}\n
-                I will be your psycotherapist. I say: {}"""
+                I will be your therapist. I say: {}"""
 
 
 
 SUMMARY_PROMPT = "You are a summarizer agent. You will receive the transcript of a psycotherapy session and are tasked with summarizing"\
 " said transcript down 50'%' if possible, keeping strictly all relevant information. Format it in screenplay format without being verbose."\
 "The following is the session transcript:\n{}\n"
-GLOBAL_SUMMARY_PROMPT = "You are a summarizer agent. You will receive a global summary of multiple psycotherapy sessions, and"\
-" the transcript of the last session and are tasked with re-summarizing all of them into one global summary, keeping most"\
-" of all relevant information. Format it as follows:\n**Session [sessionNumber]:** Description#\n"\
-"The following is the global summary:\n{}\n"\
-"The following is the last session' transcript:\n{}\n"\
-"The following events happened between the last two sessions:\n{}\n"
+
+#GLOBAL_SUMMARY_PROMPT = "You are a summarizer agent. You will receive a global summary of multiple psycotherapy sessions, and"\
+#" the transcript of the last session and are tasked with re-summarizing all of them into one global summary, keeping most"\
+#" of all relevant information. Format as follows:\n**Session [sessionNumber]:** Summary#\n"\
+#"The following is the global summary:\n{}\n"\
+#"The following is the last session' transcript:\n{}\n"\
+#"The following events happened between the last two sessions:\n{}\n"
+
+GLOBAL_SUMMARY_PROMPT = "You are a summarizer agent. You will receive a transcript of a therapy session "\
+" and are tasked with creating a new entry into the global summary list by summarizing the last session, keeping most"\
+" of all relevant information. Format as follows:\n**Session {}:** Summary\n"\
+"The following is the last session's transcript:\n{}\n" \
+#"The following is the global summary, to which the new entry will be appended:\n{}\n"
 
 TERMINATION_CHECK_PROMPT = "You are an agent responsible for determining whether a therapy session has reached its conclusion"\
 " whether through agreement or SEVERE disagreement between the two conversing parties (patient and therapist).DO NOT SIMPLY TERMINATE THE SESSION AT THE FIRST SIGHT OF CONFLICT. You will base your"\

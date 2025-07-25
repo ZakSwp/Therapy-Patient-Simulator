@@ -10,6 +10,7 @@ from utils import reset_patient_state
 
 load_dotenv() 
 
+
 apiKey = os.environ.get("GEMINI_API_KEY")
 
 if input("Reset patient state?").lower() in "yes":

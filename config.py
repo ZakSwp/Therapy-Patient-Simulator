@@ -3,7 +3,7 @@ from pathlib import Path
 #LLM SETTINGS
 
 MODEL = "gemini-2.5-flash"
-SPEECH_CONFIG = { "max_output_tokens": 2048}
+SPEECH_CONFIG = None
 SUMMARY_CONFIG = {"temperature": 0.5, "max_output_tokens": 2500}
 COGMODEL_CONFIG = {"temperature": 0}
 

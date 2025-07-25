@@ -6,6 +6,10 @@ from datetime import datetime
 import ast
 import logging
 from pathlib import Path
+import re
+import arabic_reshaper
+from bidi.algorithm import get_display
+
 
 def log_usage(user, n): #Method for logging API usage
     file_exists = os.path.isfile("usageStats.csv")  
@@ -67,7 +71,6 @@ def save_dict(filepath:str, data):
 def get_session_number(session_text: str):
     # Split into lines and look for "session X" pattern
     first_line = session_text.strip().split('\n')[0]
-    import re
     match = re.search(r'session\s+(\d+)', first_line, re.IGNORECASE)
     if match:
         return int(match.group(1))
@@ -113,3 +116,5 @@ def reset_patient_state(patient_name: str):
     copy_file_contents(globl,globlDest )
     copy_file_contents(model,modelDest )
     print("Patient state reset.\n")
+
+
