@@ -7,8 +7,6 @@ import ast
 import logging
 from pathlib import Path
 import re
-import arabic_reshaper
-from bidi.algorithm import get_display
 
 
 def log_usage(user, n): #Method for logging API usage
