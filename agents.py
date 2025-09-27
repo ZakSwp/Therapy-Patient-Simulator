@@ -93,7 +93,7 @@ class Session():
         return(response)
 
 class BaseAgent():
-    def __init__(self, apiKey, model, context, type= "generic"):
+    def __init__(self, apiKey, model, context = None , type= "generic"):
             self.context = context
             self.client = genai.Client(api_key=apiKey)
             self.apiKey = apiKey
@@ -131,8 +131,8 @@ class BaseAgent():
           return(self.type)
     
 class SpeechAgent( BaseAgent ):
-    def __init__(self, apiKey, model, context=EVENT_HIST, dialgID=0, session = None):
-        super().__init__(apiKey, model, context, "speaker")
+    def __init__(self, apiKey, model, dialgID=0, session = None):
+        super().__init__(apiKey, model, type = "speaker")
         self.dialgID = dialgID
         self.session = session
     
@@ -187,9 +187,9 @@ class SpeechAgent( BaseAgent ):
         return(self.session.globalSummary)
     
 class SummaryAgent( BaseAgent ):
-    def __init__(self, apiKey, model, context = EVENT_HIST):
+    def __init__(self, apiKey, model):
         self.seshID=0
-        super().__init__(apiKey, model, context, "summarizer")
+        super().__init__(apiKey, model,type = "summarizer")
     def generate_summary(self):
         """Generates therapy session transcript summary and updates the linked speech agent's lastSessionSummary field.
         Summary agent is required to be linked to speech agent.
@@ -217,7 +217,7 @@ class SummaryAgent( BaseAgent ):
 class CogModelAgent( BaseAgent ):
     def __init__(self, apiKey, model, personaPath):
          context = load_dict(personaPath)
-         super().__init__(apiKey, model, context, "cogModeller")
+         super().__init__(apiKey, model, context, type ="cogModeller")
     def update_cognitive_model(self):
         if "speaker" not in self.partnerDict:
            raise KeyError("Missing speech agent in partnerDict.") 
@@ -238,8 +238,8 @@ class CogModelAgent( BaseAgent ):
         return(session.get_cog_model())
 
 class EventAgent(BaseAgent):
-    def __init__(self, apiKey, model, context=None): 
-        super().__init__(apiKey, model, context, "narrator")
+    def __init__(self, apiKey, model): 
+        super().__init__(apiKey, model, type ="narrator")
     def configure(self, p:float, severityRange:tuple =(0,1), relevanceRange:tuple=(0,1), favorabilityRange:tuple = (-1,1)):
         '''Between-session event generation configuration.
         Args:
