@@ -49,7 +49,7 @@ COG_PROMPT = "You are an agent responsible for updating a patient's cognitive mo
 " Coping strategies (short string), Automatic thoughts (short string), Emotions (short string), Behaviors (short string), Control "\
 "(float in range 1 to -1), Self-Efficacy (float in range 1 to -1), Awareness (float in range 1 to -1), Recall (float in range 1 to -1"\
 " defining how good of a memory this patient has), Cooperation Level (float in range 1 to 0 represents the patient's willingness to cooperate"\
-" with therapy). Update the fields according to the  afore-mentioned data to mirror any change that occured within the last utterances. After"\
+" with therapy), Verbosity (float in range 0 to 1) defines how verbose the patient is in their speech. Update the fields according to the  afore-mentioned data to mirror any change that occured within the last utterances. After"\
 " returning the cognitive model STRICTLY EXACTLY the same way the given cognitive model was formatted (DO NOT use ``` or the word json)"\
 ", explain in a new paragraph titled 'Chain Of Thoughts' the changes using Chain Of Thoughts."\
 #". Format STRICTLY EXACTLY the same way the given cognitive model was formatted."#, using double quotes"\
