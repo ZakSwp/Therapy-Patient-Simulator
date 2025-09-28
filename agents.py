@@ -8,32 +8,33 @@ random.seed()
 class PatientProfile():
     '''Class containing the patient persona (path) and cognitive model (path) for the construction of the overall personality.
     '''
-    def __init__(self, personaPath: str, cogModelPath: str):
+    def __init__(self, patientPaths):
         try:
-            with open(personaPath, 'r') as file:
+            with open(patientPaths.PERSONA_PATH, 'r') as file:
                 self.persona = file.read()
-            self.cogModel = load_dict(cogModelPath)
-            self.paths = [personaPath, cogModelPath] 
+            self.paths = patientPaths
+            self.cogModel = load_dict(patientPaths.COGNITIVE_MODEL_PATH)
+            #self.paths = [patientPaths.PERSONA_PATH, patientPaths.COGNITIVE_MODEL_PATH] 
         except IOError as e:
             print(f"Error loading patient profile: {e} ")
 
     def update_cognitive_model(self, cogModel):
         try:
             self.cogModel = cogModel
-            save_dict(self.paths[1] , cogModel)
+            save_dict(self.paths.COGNITIVE_MODEL_PATH , cogModel)
             #print(f"Cognitive model saved at {self.paths[1]}")
         except IOError as e:
-            print(f"Error saving updated cognitive model to {self.paths[1]}")
+            print(f"Error saving updated cognitive model to {self.paths.COGNITIVE_MODEL_PATH}")
  
 class Session():
-    def __init__(self,patientProfile: PatientProfile,  lastSessionPath, globalSessionPath, dialgID=0, memory = []):
+    def __init__(self,patientProfile: PatientProfile, dialgID=0, memory = []):
         self.patient = patientProfile
         self.dialgID = dialgID
         self.memory = memory
-        self.paths = [lastSessionPath,globalSessionPath ]
-        with open(lastSessionPath, 'r') as file:
+        #self.paths = [lastSessionPath,globalSessionPath ]
+        with open(self.patient.paths.LAST_SESSION_PATH, 'r') as file:
             self.lastSessionSummary = file.read()
-        with open(globalSessionPath, 'r') as file:
+        with open(self.patient.paths.GLOBAL_SESSION_PATH, 'r') as file:
             self.globalSummary = file.read()
         try:
             self.seshID = get_session_number(self.lastSessionSummary)+1
@@ -46,21 +47,21 @@ class Session():
     def get_cog_model(self):
         """Returns the relevant patinet's cognitive model."""
         return(self.patient.cogModel)
-    def update_last_session_summary(self, summary): 
+    def update_last_session_summary(self, summary):
         """Updates last session summary file with new summary."""
         self.lastSessionSummary = summary
         try:
-            with open(self.paths[0], 'w', encoding = 'utf-8') as f:
+            with open(self.patient.paths.LAST_SESSION_PATH, 'w', encoding = 'utf-8') as f:
                 f.write(f"Summary of session {self.seshID}\n")
                 f.writelines(summary)
-            print(f"*Session summary updated: {self.paths[0]}*")
+            print(f"*Session summary updated: {self.patient.paths.LAST_SESSION_PATH}*")
         except IOError as e:
-            print(f"Failed to update session summary: {self.paths[0]}")
+            print(f"Failed to update session summary: {self.patient.paths.LAST_SESSION_PATH}")
             raise
     def update_global_summary(self, summary):
         """Updates global sessions summary file with new summary."""
         self.globalSummary += summary #TODO file management 
-        file = open(self.paths[1], "a")
+        file = open(self.patient.paths.GLOBAL_SESSION_PATH, "a")
         file.writelines("\n" + summary + "\n")
         file.close()
     def update_memory(self, qst, ans):
@@ -131,19 +132,19 @@ class BaseAgent():
           return(self.type)
     
 class SpeechAgent( BaseAgent ):
-    def __init__(self, apiKey, model, dialgID=0, session = None):
-        super().__init__(apiKey, model, type = "speaker")
+    def __init__(self, apiKey, model, context, dialgID=0, session = None):
+        super().__init__(apiKey, model, context, type = "speaker")
         self.dialgID = dialgID
         self.session = session
     
     def load_session(self, patient: PatientProfile): 
         '''Debug method. Loads an empty session (NO DIALOGUE)
         '''
-        self.session = Session(patient, Paths.LAST_SESSION_PATH, Paths.GLOBAL_SESSION_PATH)
+        self.session = Session(patient)
         print("Empty session started.")
 
     def start_session(self,patient: PatientProfile, debugMode=False):
-        self.session = Session(patient, Paths.LAST_SESSION_PATH, Paths.GLOBAL_SESSION_PATH) #TODO: get all patient related filepaths from patient args
+        self.session = Session(patient) #TODO: get all patient related filepaths from patient args
         self.partnerDict["narrator"].check_event()
         while True:
             qst,ans=self.run_prompt(debugMode)
@@ -190,6 +191,10 @@ class SummaryAgent( BaseAgent ):
     def __init__(self, apiKey, model):
         self.seshID=0
         super().__init__(apiKey, model,type = "summarizer")
+    def update_transcript_file(self):
+
+        pass
+    
     def generate_summary(self):
         """Generates therapy session transcript summary and updates the linked speech agent's lastSessionSummary field.
         Summary agent is required to be linked to speech agent.

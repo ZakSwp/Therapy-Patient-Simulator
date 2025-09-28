@@ -12,26 +12,22 @@ load_dotenv()
 
 
 apiKey = os.environ.get("GEMINI_API_KEY")
-Fatiha = PatientPaths("Fatiha")
-Hassana = PatientPaths("Hassana")
 name = input("Load Fatiha or Hassana?").lower()
 print(name)
 if  name in "fatiha":
-    PERSONA_PATH= Fatiha.PERSONA_PATH
-    COGNITIVE_MODEL_PATH=Fatiha.COGNITIVE_MODEL_PATH
+    patientPaths = PatientPaths("Fatiha")
 else:
-    PERSONA_PATH= Hassana.PERSONA_PATH
-    COGNITIVE_MODEL_PATH=Hassana.COGNITIVE_MODEL_PATH
+    patientPaths = PatientPaths("Hassana")
 
 if input("Reset patient state?").lower() in "yes":
     reset_patient_state(name)
     
-patient = agents.PatientProfile(PERSONA_PATH,COGNITIVE_MODEL_PATH)
-speechAgent = agents.SpeechAgent(apiKey, MODEL)
+patient = agents.PatientProfile(patientPaths)
+speechAgent = agents.SpeechAgent(apiKey, MODEL, patientPaths)
 eventAgent = agents.EventAgent(apiKey, MODEL)
 eventAgent.configure(0.2)
 summaryAgent = agents.SummaryAgent(apiKey, MODEL)
-cogModelAgent = agents.CogModelAgent(apiKey, MODEL,COGNITIVE_MODEL_PATH)
+cogModelAgent = agents.CogModelAgent(apiKey, MODEL,patientPaths.COGNITIVE_MODEL_PATH)
 speechAgent.link_agents([summaryAgent,cogModelAgent, eventAgent])
 speechAgent.start_session(patient)
 
